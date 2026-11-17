@@ -31,4 +31,4 @@ dependencies {
 
 ## License
 
-MIT. Not affiliated with Mojang or FabricMC.
+MIT.
