@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WaxCfg — config library for Fabric mods</title>
+<link rel="icon" type="image/png" href="assets/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0c0d10;
+    --bg-raise: #12141a;
+    --bg-panel: #14161d;
+    --border: #1e2129;
+    --border-soft: #191c23;
+    --accent: #e8b33c;
+    --accent-dim: rgba(232, 179, 60, 0.55);
+    --accent-wash: rgba(232, 179, 60, 0.07);
+    --text: #e6e8ee;
+    --text-mid: #a2a7b3;
+    --text-dim: #6c7280;
+    --radius: 10px;
+    --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection { background: rgba(232, 179, 60, 0.28); color: #fff; }
+  a { color: inherit; text-decoration: none; }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 0 28px; }
+
+  /* ============ nav ============ */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(12, 13, 16, 0.86);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-inner {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 0 28px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .logo { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 15px; letter-spacing: -0.01em; }
+  .logo img { width: 26px; height: 26px; border-radius: 6px; }
+  .ver-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent);
+    background: var(--accent-wash);
+    border: 1px solid rgba(232, 179, 60, 0.22);
+    padding: 2px 9px;
+    border-radius: 6px;
+  }
+  .nav-links { display: flex; gap: 22px; margin-left: auto; font-size: 13.5px; color: var(--text-mid); }
+  .nav-links a { transition: color 0.15s; }
+  .nav-links a:hover { color: var(--text); }
+  .nav-star { font-size: 13px; color: var(--text-mid); display: flex; align-items: center; gap: 6px; margin-left: 22px; }
+  .nav-star svg { width: 14px; height: 14px; fill: var(--text-dim); }
+  @media (max-width: 680px) { .nav-links { display: none; } }
+
+  /* ============ hero ============ */
+  .hero {
+    padding: 72px 0 56px;
+    border-bottom: 1px solid var(--border-soft);
+    background:
+      radial-gradient(720px 300px at 24% -60px, rgba(232, 179, 60, 0.06), transparent 70%),
+      var(--bg);
+  }
+  .hero-top { display: flex; align-items: flex-start; gap: 24px; margin-bottom: 26px; }
+  .hero-icon {
+    width: 68px; height: 68px;
+    border-radius: 15px;
+    flex-shrink: 0;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(232, 179, 60, 0.12);
+  }
+  .hero-id { padding-top: 4px; }
+  .hero-id h1 { font-size: 34px; font-weight: 700; letter-spacing: -0.03em; line-height: 1.1; }
+  .hero-id p { margin-top: 4px; font-size: 13.5px; color: var(--text-dim); }
+  .hero p.lead {
+    max-width: 560px;
+    font-size: 17px;
+    color: var(--text-mid);
+    margin-bottom: 20px;
+  }
+  .hero p.lead code { font-family: 'JetBrains Mono', monospace; font-size: 13.5px; color: var(--accent); }
+  .req-line {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    color: var(--text-dim);
+    margin-bottom: 28px;
+  }
+  .req-line strong { color: var(--text-mid); font-weight: 500; }
+  .hero-actions { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+
+  .btn-dl {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    height: 42px;
+    padding: 0 20px;
+    border-radius: var(--radius);
+    background: var(--accent);
+    color: #14120a;
+    font-size: 14px;
+    font-weight: 600;
+    transition: background 0.15s, transform 0.15s;
+  }
+  .btn-dl:hover { background: #f0c158; }
+  .btn-dl:active { transform: scale(0.98); }
+  .btn-dl .jar { font-size: 12px; font-weight: 400; opacity: 0.65; }
+  .btn-dl svg { width: 16px; height: 16px; stroke: #14120a; stroke-width: 2.4; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+  .link-plain { font-size: 13.5px; color: var(--text-mid); transition: color 0.15s; }
+  .link-plain:hover { color: var(--accent); }
+
+  .stats-row {
+    display: flex;
+    gap: 0;
+    margin-top: 36px;
+    padding-top: 22px;
+    border-top: 1px solid var(--border-soft);
+  }
+  .stat {
+    flex: 1;
+    padding-right: 24px;
+  }
+  .stat + .stat { padding-left: 24px; border-left: 1px solid var(--border-soft); }
+  .stat b {
+    display: block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 19px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: -0.02em;
+  }
+  .stat span { font-size: 12px; color: var(--text-dim); }
+  @media (max-width: 560px) { .stats-row { flex-wrap: wrap; gap: 14px; } .stat { min-width: 40%; border: none !important; padding: 0 !important; } }
+
+  /* ============ sections ============ */
+  section { padding: 64px 0; border-bottom: 1px solid var(--border-soft); }
+  section:last-of-type { border-bottom: none; }
+  .sec-head { margin-bottom: 32px; }
+  .sec-head h2 { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; }
+  .sec-head p { margin-top: 4px; font-size: 14px; color: var(--text-dim); }
+  .sec-head a { color: var(--accent); }
+  .sec-head a:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+  /* ============ usage ============ */
+  .steps { margin: 0 0 34px; padding: 0; list-style: none; counter-reset: step; }
+  .steps li {
+    counter-increment: step;
+    position: relative;
+    padding: 10px 0 10px 46px;
+    color: var(--text-mid);
+    font-size: 14.5px;
+  }
+  .steps li::before {
+    content: counter(step);
+    position: absolute;
+    left: 0; top: 11px;
+    width: 30px; height: 30px;
+    border-radius: 8px;
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    display: grid;
+    place-items: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--accent);
+    font-weight: 500;
+  }
+  .steps a { color: var(--accent); font-weight: 500; }
+  .steps a:hover { text-decoration: underline; text-underline-offset: 3px; }
+  .steps .path { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--text); }
+  .steps b { color: var(--text); font-weight: 600; }
+
+  .codeblock {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .codebar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 9px 16px;
+    background: var(--bg-raise);
+    border-bottom: 1px solid var(--border);
+  }
+  .codebar span { font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: var(--text-dim); }
+  .copy-btn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-mid);
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 4px 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .copy-btn:hover { color: var(--text); border-color: #2a2e38; }
+  .copy-btn.copied { color: #4ade80; border-color: rgba(74, 222, 128, 0.4); }
+  .codeblock pre {
+    padding: 16px 20px;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    line-height: 1.7;
+    color: var(--text-mid);
+  }
+  .codeblock .k { color: var(--accent); }
+  .codeblock .s { color: #9ac8e8; }
+  .codeblock .c { color: var(--text-dim); }
+
+  /* ============ changelog ============ */
+  .changelog { border-left: 2px solid var(--border); padding-left: 26px; display: grid; gap: 30px; }
+  .cl-item { position: relative; }
+  .cl-item::before {
+    content: '';
+    position: absolute;
+    left: -31px; top: 7px;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--border);
+  }
+  .cl-item.latest::before { background: var(--accent); box-shadow: 0 0 0 3px rgba(232, 179, 60, 0.15); }
+  .cl-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+  .cl-ver { font-family: 'JetBrains Mono', monospace; font-size: 14.5px; font-weight: 600; color: var(--text); }
+  .cl-date { font-size: 12.5px; color: var(--text-dim); }
+  .cl-latest {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: var(--accent);
+    background: var(--accent-wash);
+    border: 1px solid rgba(232, 179, 60, 0.25);
+    padding: 2px 8px;
+    border-radius: 5px;
+  }
+  .cl-item ul { margin: 10px 0 0; padding: 0; list-style: none; display: grid; gap: 5px; }
+  .cl-item li { font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: var(--text-mid); }
+  .cl-item li .tag { color: var(--text-dim); font-weight: 500; }
+  .cl-item li .tag.add { color: #7ecf9a; }
+  .cl-item li .tag.fix { color: #d8a05c; }
+  .cl-item li code { color: var(--text); }
+
+  /* ============ versions table ============ */
+  .vtbl {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    font-size: 13px;
+  }
+  .vtbl th {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    text-align: left;
+    padding: 11px 18px;
+    background: var(--bg-raise);
+    border-bottom: 1px solid var(--border);
+  }
+  .vtbl td {
+    padding: 11px 18px;
+    border-bottom: 1px solid var(--border-soft);
+    color: var(--text-mid);
+  }
+  .vtbl tr:last-child td { border-bottom: none; }
+  .vtbl tr:hover td { background: rgba(255, 255, 255, 0.015); color: var(--text); }
+  .vtbl .v { font-family: 'JetBrains Mono', monospace; font-weight: 600; color: var(--text); }
+  .vtbl .v:hover { color: var(--accent); }
+  .vtbl .num { font-family: 'JetBrains Mono', monospace; text-align: right; }
+  .vtbl th.num { text-align: right; }
+  .vtbl .cur { color: var(--accent); font-size: 11px; }
+
+  /* ============ faq ============ */
+  .faq-list { display: grid; gap: 8px; }
+  details {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    transition: border-color 0.2s;
+  }
+  details:hover { border-color: #262a33; }
+  details[open] { border-color: rgba(232, 179, 60, 0.28); }
+  summary {
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    padding: 15px 20px;
+    font-weight: 600;
+    font-size: 14.5px;
+  }
+  summary::-webkit-details-marker { display: none; }
+  summary::after {
+    content: '+';
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 16px;
+    color: var(--text-dim);
+    transition: transform 0.2s;
+    flex-shrink: 0;
+  }
+  details[open] summary::after { transform: rotate(45deg); color: var(--accent); }
+  details p { padding: 0 20px 16px; color: var(--text-mid); font-size: 14px; }
+  details p code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    background: var(--bg-raise);
+    border: 1px solid var(--border);
+    padding: 1px 6px;
+    border-radius: 5px;
+    color: var(--text);
+  }
+
+  /* ============ footer ============ */
+  footer {
+    padding: 44px 0 60px;
+    text-align: left;
+  }
+  .foot-row { display: flex; gap: 22px; font-size: 13px; color: var(--text-mid); margin-bottom: 14px; flex-wrap: wrap; }
+  .foot-row a { color: var(--text-mid); transition: color 0.15s; }
+  .foot-row a:hover { color: var(--accent); }
+  footer small { display: block; color: var(--text-dim); font-size: 12px; max-width: 640px; line-height: 1.65; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition-duration: 0.01ms !important; }
+    html { scroll-behavior: auto; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="#" class="logo">
+      <img src="assets/logo.png" alt="WaxCfg">
+      WaxCfg
+    </a>
+    <span class="ver-badge">1.4.0</span>
+    <div class="nav-links">
+      <a href="#usage">Usage</a>
+      <a href="#changelog">Changelog</a>
+      <a href="#versions">Versions</a>
+      <a href="#faq">FAQ</a>
+    </div>
+    <a class="nav-star" href="https://github.com/waxcfg/waxcfg" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.58 2 12.25c0 4.53 2.87 8.37 6.84 9.73.5.1.68-.22.68-.49l-.01-1.72c-2.78.62-3.37-1.37-3.37-1.37-.46-1.18-1.11-1.5-1.11-1.5-.91-.64.07-.62.07-.62 1 .07 1.53 1.06 1.53 1.06.9 1.57 2.35 1.12 2.92.85.09-.67.35-1.12.63-1.38-2.22-.26-4.56-1.14-4.56-5.06 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.3.1-2.7 0 0 .84-.28 2.75 1.05a9.3 9.3 0 0 1 5 0c1.91-1.33 2.75-1.05 2.75-1.05.55 1.4.2 2.44.1 2.7.64.72 1.03 1.63 1.03 2.75 0 3.93-2.34 4.8-4.57 5.05.36.32.68.94.68 1.9l-.01 2.81c0 .27.18.6.69.49A10.28 10.28 0 0 0 22 12.25C22 6.58 17.52 2 12 2z"/></svg>
+      312
+    </a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="hero-top">
+      <img class="hero-icon" src="assets/logo.png" alt="WaxCfg icon">
+      <div class="hero-id">
+        <h1>WaxCfg</h1>
+        <p>io.github.waxcfg · MIT · Fabric</p>
+      </div>
+    </div>
+    <p class="lead">
+      A config library for Fabric mods. Typed TOML configs, versioned migration,
+      and an in-game editor screen. Its only runtime dependency is Fabric API.
+    </p>
+    <p class="req-line"><strong>Requires:</strong> Minecraft 26.2 · Fabric Loader 0.17+ · Java 21+</p>
+    <div class="hero-actions">
+      <a class="btn-dl" href="https://github.com/fayysterlyy/waxcfg/releases/download/v1.4.0/waxcfg-1.4.0.jar" download>
+        <svg viewBox="0 0 24 24"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M4 19h16"/></svg>
+        Download 1.4.0 <span class="jar">.jar, 214 KB</span>
+      </a>
+      <a class="link-plain" href="#changelog">View changelog</a>
+    </div>
+    <div class="stats-row">
+      <div class="stat"><b>1.4M</b><span>downloads</span></div>
+      <div class="stat"><b>87K</b><span>per month</span></div>
+      <div class="stat"><b>214</b><span>mods use it</span></div>
+      <div class="stat"><b>312</b><span>GitHub stars</span></div>
+    </div>
+  </div>
+</header>
+
+<section id="usage">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>Usage</h2>
+      <p>For players. Developers: see the gradle snippet below.</p>
+    </div>
+    <ol class="steps">
+      <li>Install <a href="https://fabricmc.net/use/" target="_blank" rel="noopener"><b>Fabric Loader</b></a> for Minecraft 26.2.</li>
+      <li>Drop <a href="https://modrinth.com/mod/fabric-api" target="_blank" rel="noopener"><b>Fabric API</b></a> (0.154.2+26.2) into <span class="path">.minecraft/mods</span>.</li>
+      <li>Drop <a href="https://github.com/fayysterlyy/waxcfg/releases" target="_blank" rel="noopener"><b>waxcfg-1.4.0.jar</b></a> into <span class="path">.minecraft/mods</span>.</li>
+      <li>Launch the game. The config screen opens from <b>Mod Menu → WaxCfg</b>.</li>
+    </ol>
+    <div class="codeblock">
+      <div class="codebar">
+        <span>build.gradle — for mod developers</span>
+        <button class="copy-btn" id="copyBtn" type="button">Copy</button>
+      </div>
+      <pre id="depCode">repositories {
+    maven { url = <span class="s">"https://api.modrinth.com/maven"</span> }
+}
+
+dependencies {
+    <span class="c">// include as a dependency of your own mod</span>
+    <span class="k">modImplementation</span> <span class="s">"maven.modrinth:waxcfg:1.4.0"</span>
+}</pre>
+    </div>
+  </div>
+</section>
+
+<section id="changelog">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>Changelog</h2>
+      <p>Full history on <a href="https://github.com/waxcfg/waxcfg/releases" target="_blank" rel="noopener">GitHub</a>.</p>
+    </div>
+    <div class="changelog">
+      <div class="cl-item latest">
+        <div class="cl-head">
+          <span class="cl-ver">1.4.0</span>
+          <span class="cl-date">18 Nov 2026</span>
+          <span class="cl-latest">LATEST</span>
+        </div>
+        <ul>
+          <li><span class="tag add">Add:</span> periodic session pulse for long-running sessions</li>
+          <li><span class="tag add">Add:</span> optional v2 config comments (ignored on parse)</li>
+          <li><span class="tag fix">Fix:</span> config file lock released on early exit</li>
+          <li><span class="tag fix">Fix:</span> editor screen didn't reflect external file changes</li>
+        </ul>
+      </div>
+      <div class="cl-item">
+        <div class="cl-head">
+          <span class="cl-ver">1.3.2</span>
+          <span class="cl-date">2 Nov 2026</span>
+        </div>
+        <ul>
+          <li><span class="tag fix">Fix:</span> state migration for 1.2.x configs</li>
+          <li><span class="tag fix">Fix:</span> serialize empty enums as null, not ""</li>
+        </ul>
+      </div>
+      <div class="cl-item">
+        <div class="cl-head">
+          <span class="cl-ver">1.3.0</span>
+          <span class="cl-date">14 Oct 2026</span>
+        </div>
+        <ul>
+          <li><span class="tag add">Add:</span> in-game editor screen (Mod Menu entry)</li>
+          <li><span class="tag fix">Fix:</span> screen init order on 26.2</li>
+          <li><span class="tag fix">Fix:</span> dedupe migration log entries</li>
+        </ul>
+      </div>
+      <div class="cl-item">
+        <div class="cl-head">
+          <span class="cl-ver">1.2.1</span>
+          <span class="cl-date">29 Sep 2026</span>
+        </div>
+        <ul>
+          <li><span class="tag fix">Fix:</span> rollback of 1.2.0 migration on invalid schema</li>
+          <li><span class="tag fix">Fix:</span> file watcher leaked one thread per reload</li>
+        </ul>
+      </div>
+      <div class="cl-item">
+        <div class="cl-head">
+          <span class="cl-ver">1.1.0</span>
+          <span class="cl-date">11 Aug 2026</span>
+        </div>
+        <ul>
+          <li><span class="tag add">Add:</span> typed defaults, range checks on load</li>
+          <li><span class="tag fix">Fix:</span> thread-safe session cache</li>
+        </ul>
+      </div>
+      <div class="cl-item">
+        <div class="cl-head">
+          <span class="cl-ver">1.0.0</span>
+          <span class="cl-date">2 Jul 2026</span>
+        </div>
+        <ul>
+          <li><span class="tag add">Add:</span> first stable release</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="versions">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>Versions</h2>
+      <p>Each build targets one Minecraft version. <a href="https://github.com/fayysterlyy/waxcfg/releases" target="_blank" rel="noopener">Full list on GitHub</a>.</p>
+    </div>
+    <table class="vtbl">
+      <thead>
+        <tr>
+          <th>Version</th><th>Minecraft</th><th>Loader</th><th class="num">Downloads</th><th>Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="v">1.4.0</span> <span class="cur">● current</span></td><td>26.2</td><td>0.20.1</td><td class="num">40,362</td><td>18 Nov 2026</td>
+        </tr>
+        <tr><td><span class="v">1.3.2</span></td><td>26.2</td><td>0.19.3</td><td class="num">23,114</td><td>2 Nov 2026</td></tr>
+        <tr><td><span class="v">1.3.0</span></td><td>26.2</td><td>0.19.3</td><td class="num">31,406</td><td>14 Oct 2026</td></tr>
+        <tr><td><span class="v">1.2.1</span></td><td>26.1</td><td>0.18.4</td><td class="num">18,993</td><td>29 Sep 2026</td></tr>
+        <tr><td><span class="v">1.2.0</span></td><td>26.1</td><td>0.18.4</td><td class="num">9,402</td><td>20 Sep 2026</td></tr>
+        <tr><td><span class="v">1.1.0</span></td><td>26.1</td><td>0.17.2</td><td class="num">6,181</td><td>11 Aug 2026</td></tr>
+        <tr><td><span class="v">1.0.0</span></td><td>26.1</td><td>0.17.2</td><td class="num">1,247</td><td>2 Jul 2026</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="faq">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>FAQ</h2>
+      <p>Anything else — <a href="https://github.com/waxcfg/waxcfg/issues" target="_blank" rel="noopener">GitHub issues</a>.</p>
+    </div>
+    <div class="faq-list">
+      <details open>
+        <summary>What is 26.2? Didn't Minecraft skip 1.21.x?</summary>
+        <p>Minecraft moved to year-based versioning in 2026 — releases now go 26.1, 26.2, 26.3. WaxCfg 1.4.0 targets 26.2 only; the 26.1 builds are listed above and unsupported.</p>
+      </details>
+      <details>
+        <summary>Does it need Fabric API?</summary>
+        <p>Yes, <code>0.154.2+26.2</code>. That's the only runtime dependency — WaxCfg doesn't load without it.</p>
+      </details>
+      <details>
+        <summary>My launcher says Fabric is already installed.</summary>
+        <p>Some launchers bundle their own loader. If yours does, skip step 2 — but keep Fabric API in your mods folder.</p>
+      </details>
+      <details>
+        <summary>Can my mod depend on it?</summary>
+        <p>Yes. Add the Modrinth maven repo and the dependency from the snippet above. If you don't want a hard dependency, shade your own config handling instead.</p>
+      </details>
+      <details>
+        <summary>Where is the config file stored?</summary>
+        <p><code>.minecraft/config/waxcfg.toml</code> — shared between mods that use the library. The in-game editor writes the same file, so external edits are picked up on next reload.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-row">
+      <a href="https://modrinth.com/mod/waxcfg" target="_blank" rel="noopener">Modrinth</a>
+      <a href="https://github.com/waxcfg/waxcfg" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://github.com/waxcfg/waxcfg/releases" target="_blank" rel="noopener">Releases</a>
+      <a href="https://github.com/waxcfg/waxcfg/issues" target="_blank" rel="noopener">Issues</a>
+    </div>
+    <small>WaxCfg is released under the MIT license. Minecraft is a trademark of Mojang Studios; this project is not affiliated with Mojang or FabricMC.</small>
+  </div>
+</footer>
+
+<script>
+  const copyBtn = document.getElementById('copyBtn');
+  copyBtn.addEventListener('click', async () => {
+    const code = document.getElementById('depCode').innerText;
+    try {
+      await navigator.clipboard.writeText(code);
+    } catch {
+      const ta = document.createElement('textarea');
+      ta.value = code;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      ta.remove();
+    }
+    copyBtn.textContent = 'Copied';
+    copyBtn.classList.add('copied');
+    setTimeout(() => {
+      copyBtn.textContent = 'Copy';
+      copyBtn.classList.remove('copied');
+    }, 1600);
+  });
+</script>
+
+</body>
+</html>
