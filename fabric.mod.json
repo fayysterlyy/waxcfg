@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "id": "waxcfg",
+  "version": "1.4.0",
+  "name": "Wax Config",
+  "description": "A lightweight configuration library for client mods. Provides shared options storage, config serializers, keybind helpers and config screen scaffolding used by several Wax libraries.",
+  "authors": [
+    "wax"
+  ],
+  "contact": {
+    "homepage": "https://modrinth.com/mod/waxcfg",
+    "sources": "https://github.com/waxcfg/waxcfg",
+    "issues": "https://github.com/waxcfg/waxcfg/issues"
+  },
+  "license": "MIT",
+  "icon": "assets/waxcfg/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "waxcfg.WaxConfigApi"
+    ]
+  },
+  "custom": {
+    "modmenu": {
+      "links": {
+        "modrinth.com/mod/waxcfg": "Homepage"
+      },
+      "badges": [
+        "library"
+      ]
+    }
+  },
+  "depends": {
+    "fabricloader": ">=0.17.0",
+    "minecraft": ">=26.2",
+    "java": ">=25"
+  }
+}

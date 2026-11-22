@@ -1,0 +1,25 @@
+# backups taken during edits
+*.bak-*
+*.bak
+*.orig
+
+# build output
+build/
+out/
+*.class
+
+# temp / logs / local db
+*.tmp
+*.temp
+*.ldb
+*.log
+*.lck
+logs/
+
+# os / editor
+Thumbs.db
+desktop.ini
+.DS_Store
+.idea/
+.vscode/
+*.iml
